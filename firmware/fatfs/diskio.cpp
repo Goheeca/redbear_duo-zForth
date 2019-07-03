@@ -158,16 +158,16 @@ DRESULT disk_write (
 		Serial.printf("\r\n");
 #endif
 
-		static uint8_t page_buff[sFLASH_PAGESIZE];
-		static uint8_t sector_buff[FF_MAX_SS];
+		uint8_t *page_buff = (uint8_t *) malloc(sFLASH_PAGESIZE * sizeof(uint8_t));
+		//static uint8_t sector_buff[FF_MAX_SS];
 		for (UINT i = 0; i < count; i++) {
 #if DEBUG_TRACE == 2
-			Serial.printf("sFLASH.readBuffer(%p, 0x%x, %u)\r\n", sector_buff, (i+sector)*FF_MAX_SS, FF_MAX_SS);
+			Serial.printf("sFLASH.readBuffer(%p, 0x%x, %u)\r\n", page_buff, (i+sector)*FF_MAX_SS, FF_MAX_SS);
 #endif
-			sFLASH.readBuffer(sector_buff, (i+sector)*FF_MAX_SS, FF_MAX_SS);
+			sFLASH.readBuffer(page_buff, (i+sector)*FF_MAX_SS, FF_MAX_SS);
 			bool erase = false;
 			for(UINT j = 0; j < FF_MAX_SS; j++) {
-				if ((sector_buff[j] & (const uint8_t) buff[i*FF_MAX_SS + j]) != (const uint8_t) buff[i*FF_MAX_SS + j]) {
+				if ((page_buff[j] & (const uint8_t) buff[i*FF_MAX_SS + j]) != (const uint8_t) buff[i*FF_MAX_SS + j]) {
 					erase = true;
 					break;
 				}
@@ -198,6 +198,7 @@ DRESULT disk_write (
 				sFLASH.writeBuffer((const uint8_t *) &buff[(i+sector)*FF_MAX_SS], (i+sector)*FF_MAX_SS, FF_MAX_SS);
 			}
 		}
+		free(page_buff);
 		res = RES_OK;
 	}
 #if DEBUG_TRACE
