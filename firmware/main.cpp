@@ -23,13 +23,6 @@ void set_mode(system_event_t event, int param)
     }
 }
 
-void setup() // Put setup code here to run once
-{
-    System.on(button_final_click, set_mode);
-    Serial.begin(9600);
-    RGB.control(true);
-}
-
 static FATFS *fs;           /* Filesystem object */
 
 bool mount_fs() {
@@ -37,21 +30,21 @@ bool mount_fs() {
 
     /* Register work area */
     fs = (FATFS *) malloc(sizeof(FATFS));
-    res = f_mount(fs, "0:", 1);
+    res = f_mount(fs, "", 1);
     if (res) return false;
     return true;
 }
 
 void umount_fs() {
     /* Unregister work area */
-    f_mount(0, "0:", 0);
+    f_mount(0, "", 0);
     free(fs);
     fs = NULL;
 }
 
-PARTITION VolToPart[] = {
+/*PARTITION VolToPart[] = {
     {0, 0}
-};
+};*/
 
 static bool created = false;
 
@@ -63,11 +56,11 @@ void create_fs() {
 
     BYTE work[FF_MAX_SS]; /* Work area (larger is better for processing time) */
 
-    DWORD plist[] = {100, 0, 0, 0};  /* Divide drive into one partition */
-    f_fdisk(0, plist, work);                    /* Divide physical drive 0 */
+    //DWORD plist[] = {100, 0, 0, 0};  /* Divide drive into one partition */
+    //f_fdisk(0, plist, work);                    /* Divide physical drive 0 */
 
     /* Create FAT volume */
-    res = f_mkfs("0:", FM_ANY, 0, work, sizeof work);
+    res = f_mkfs("", FM_FAT, 0, work, sizeof work);
     if (res) {
         mode_flag = IDLE;
         return;
@@ -106,7 +99,7 @@ void io() {
     UINT bw;
 
     res = f_stat("counter.txt", &fno);
-    switch(res) {
+    /*switch(res) {
         case FR_NO_FILE:
             Serial.printf("FR_NO_FILE\r\n");
             if(!created) {
@@ -128,7 +121,8 @@ void io() {
             Serial.printf("FR_ERROR\r\n");
     }
     free(buf);
-    return;
+    delay(1000);
+    return;*/
 
     switch(res) {
         case FR_NO_FILE:
@@ -197,6 +191,20 @@ void idle() {
     delay(1000);
     RGB.color(0,0,255);
     delay(1000);
+}
+
+void cleanup(system_event_t event) {
+    umount_fs();
+}
+
+// Entry points
+
+void setup() // Put setup code here to run once
+{
+    System.on(button_final_click, set_mode);
+    System.on(reset, cleanup);
+    Serial.begin(9600);
+    RGB.control(true);
 }
 
 void loop() // Put code here to loop forever
