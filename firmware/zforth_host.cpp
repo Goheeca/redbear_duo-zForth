@@ -157,6 +157,22 @@ zf_input_state zf_host_sys(zf_syscall_id id, const char *input) {
 			save("zforth.save");
 			break;
 
+		case ZF_SYSCALL_USER + 4:
+			RGB.control((bool) zf_pop());
+			break;
+
+		case ZF_SYSCALL_USER + 5:
+			RGB.color((int) zf_pop(), (int) zf_pop(), (int) zf_pop());
+			break;
+
+		case ZF_SYSCALL_USER + 6:
+			delay((int) zf_pop());
+			break;
+
+		case ZF_SYSCALL_USER + 7:
+			delayMicroseconds((int) zf_pop());
+			break;
+
 		default:
 			printf("unhandled syscall %d\r\n", id);
 			break;

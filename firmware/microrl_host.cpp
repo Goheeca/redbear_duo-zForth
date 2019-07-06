@@ -45,9 +45,23 @@ char mrl_get_char(jmp_buf *no_input) {
 // execute callback
 int mrl_execute(int argc, const char * const * argv) {
 	if (executor) {
-		for(int i = 0; i < argc; i++) {
-			(*executor)(argv[i]);
+		int len = 0;
+		int i;
+		for(i = 0; i < argc; i++) {
+			len += strlen(argv[i]) + !!i;
 		}
+		char * const line = (char * const) malloc(len);
+		char *head = line;
+		for(i = 0; i < argc; i++) {
+			if(i != 0) {
+				*head = ' ';
+				head++;
+			}
+			strcpy(head, argv[i]);
+			head += strlen(argv[i]);
+		}
+		(*executor)(line);
+		free(line);
 		zforth_line++;
 		Serial.printf("\r\n");
 	}

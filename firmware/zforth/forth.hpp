@@ -10,6 +10,12 @@ const char *CORE_FORTH = R"forth(
 : include 130 sys ;
 : save    131 sys ;
 
+: RGB.control 132 sys ;
+: RGB.color 133 sys ;
+
+: delay   134 sys ;
+: udelay  135 sys ;
+
 : !    0 !! ;
 : @    0 @@ ;
 : ,    0 ,, ;
