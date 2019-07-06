@@ -1,0 +1,3 @@
+FatFs -- ChaN http://elm-chan.org/fsw/ff/doc/appnote.html
+zForth -- Ico Doornekamp https://github.com/zevv
+microrl -- Eugene Samoylov https://github.com/Helius
