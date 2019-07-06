@@ -4,7 +4,6 @@
 //#include <cstdlib>
 #include <cstdio>
 #include <cstdarg>
-#include <csetjmp>
 #include <cmath>
 
 extern "C" {
@@ -12,6 +11,7 @@ extern "C" {
 }
 #include "zforth_host.hpp"
 #include "zforth/forth.hpp"
+#include "microrl_host.hpp"
 
 zf_result do_eval(const char *src, int line, const char *buf) {
 	const char *msg = NULL;
@@ -36,7 +36,7 @@ zf_result do_eval(const char *src, int line, const char *buf) {
 	if(msg) {
 		Serial.printf("\033[31m");
 		if(src) Serial.printf("%s:%d: ", src, line);
-		Serial.printf("%s\033[0m\r\n", msg);
+		Serial.printf("%s\033[0m", msg);
 	}
 
 	return rv;
@@ -81,11 +81,15 @@ static void save(const char *fname) {
 	Serial.printf("error reading file '%s': NOT_IMPLEMNTED\r\n", fname);
 }*/
 
-static char buf[1024];
-
 #define TRACE 0
 
 static jmp_buf quit;
+static jmp_buf no_input;
+int zforth_line = 1;
+
+void word_eval(const char* word) {
+	do_eval("stdin", zforth_line, word);
+}
 
 void forth(void) {
 	/* Initialize zforth */
@@ -95,37 +99,16 @@ void forth(void) {
 	//zf_eval(": . 1 sys ;");
 	zf_eval(CORE_FORTH);
 
+	mrl_init(&word_eval);
 
 	/* Main loop: read words and eval */
 
-	uint8_t l = 0;
-	int line = 1;
-
 	for(;!setjmp(quit);) {
+		setjmp(no_input);
 		if (mode_flag != FORTH) {
 			break;
 		}
-		if (!Serial.available()) {
-			continue;
-		}
-		int c = Serial.read();
-		Serial.printf("\033[32m");
-		Serial.write(c);
-		Serial.printf("\033[0m");
-		if(c == 10 || c == 13 /*|| c == 32*/) {
-			if(c != 32) {
-				line++;
-			}
-			Serial.printf("\r\n");
-			do_eval("stdin", line, buf);
-			Serial.printf("\r\n");
-			l = 0;
-		} else if(l < sizeof(buf)-1) {
-			buf[l++] = c;
-		}
-
-		buf[l] = '\0';
-		//Serial.printf("\033[32m%s\033[0m\r\n", buf);
+		mrl_process_input(&no_input);
 	}
 	mode_flag = IDLE;
 }

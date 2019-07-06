@@ -4,5 +4,6 @@
 #include "main.hpp"
 
 void forth();
+extern int zforth_line;
 
 #endif
