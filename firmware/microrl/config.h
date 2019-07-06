@@ -20,8 +20,10 @@ Command token number, define max token it command line, if number of token
 typed in command line exceed this value, then prints message about it and
 command line not to be parced and 'execute' callback will not calls.
 Token is word separate by white space, for example 3 token line:
-"IRin> set mode test" */
-#define _COMMAND_TOKEN_NMB 40
+"IRin> set mode test"
+
+If it's set to zero, the whole line will be in the first token.*/
+#define _COMMAND_TOKEN_NMB 0
 
 /*
 Define you prompt string here. You can use colors escape code, for highlight you prompt,
@@ -39,7 +41,8 @@ ESC sequence, it's not possible detect only text length*/
 now if user press TAB calls 'copmlitetion' callback. If you no need it, you can just set
 NULL to callback ptr and do not use it, but for memory saving tune,
 if you are not going to use it - disable this define.*/
-#define _USE_COMPLETE
+//#define _USE_COMPLETE
+#undef _USE_COMPLETE
 
 /*Define it, if you wanna use history. It s work's like bash history, and
 set stored value to cmdline, if UP and DOWN key pressed. Using history add
