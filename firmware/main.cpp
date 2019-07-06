@@ -1,9 +1,10 @@
-#include "Particle.h"
-#include "fatfs/ff.h"
-#include "fatfs/diskio.h"
+#include "main.hpp"
+volatile Mode mode_flag = FORTH;
 
-enum Mode { CREATE_FS, IO, IDLE };
-volatile Mode mode_flag = IDLE;
+#include "fatfs/ff.h"
+//#include "fatfs/diskio.h"
+
+#include "zforth_host.hpp"
 
 void set_mode(system_event_t event, int param)
 {
@@ -15,9 +16,12 @@ void set_mode(system_event_t event, int param)
             mode_flag = IDLE;
             break;
         case 2:
-            mode_flag = IO;
+            mode_flag = FORTH;
             break;
         case 3:
+            mode_flag = IO;
+            break;
+        case 4:
             mode_flag = CREATE_FS;
             break;
     }
@@ -193,6 +197,8 @@ void idle() {
     delay(1000);
 }
 
+
+
 void cleanup(system_event_t event) {
     umount_fs();
 }
@@ -218,6 +224,9 @@ void loop() // Put code here to loop forever
             break;
         case IDLE:
             idle();
+            break;
+        case FORTH:
+            forth();
             break;
     }
 }
