@@ -1,4 +1,5 @@
 #include "main.hpp"
+SYSTEM_THREAD(ENABLED);
 volatile Mode mode_flag = FORTH;
 
 #include "fatfs/ff.h"
